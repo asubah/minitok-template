@@ -44,8 +44,53 @@ class NFA:
     def simulate(self, s: str) -> bool:
         """True iff this NFA accepts string s (on-the-fly subset simulation
         with epsilon closures). Must handle epsilon cycles."""
-        # TODO(PART A2/A3): implement
-        raise NotImplementedError("NFA.simulate is not implemented yet")
+        # TODO(PART A2/A3): implement وفاء سوته عشان يصير شغلها كامل
+
+
+        current = {self.start}
+        visited = set()
+        stack = list(current)
+
+        while stack:
+            state = stack.pop()
+
+            if state in visited:
+                continue
+
+            visited.add(state)
+
+            for next_state in self.transitions.get(state, {}).get(EPS, set()):
+                if next_state not in visited:
+                    stack.append(next_state)
+
+        current = visited
+
+        for char in s:
+            next_states = set()
+
+            for state in current:
+                next_states.update(
+                    self.transitions.get(state, {}).get(char, set())
+                )
+
+            visited = set()
+            stack = list(next_states)
+
+            while stack:
+                state = stack.pop()
+
+                if state in visited:
+                    continue
+
+                visited.add(state)
+
+                for next_state in self.transitions.get(state, {}).get(EPS, set()):
+                    if next_state not in visited:
+                        stack.append(next_state)
+
+            current = visited
+
+        return bool(current & self.accepts)
 
 
 @dataclass
