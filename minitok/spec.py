@@ -82,6 +82,7 @@ def can_match_empty(regex):
 
     def atom():
         nonlocal i
+        empty = False
 
         if regex[i] == "(":
             i += 1
@@ -100,12 +101,21 @@ def can_match_empty(regex):
             empty = False
 
         elif regex[i] == "<":
-            end = regex.find(">", i)
-            if end == -1:
-                raise SpecError("Invalid shorthand")
-            i = end + 1
             empty = False
 
+            if regex.startswith("<letter>", i):
+                i += len("<letter>")
+            elif regex.startswith("<digit>", i):
+                i += len("<digit>")
+            elif regex[i:].startswith("<") and ">" in regex[i + 1:]:
+                end = regex.find(">", i)
+                if "|" not in regex[i:end]:
+                    raise SpecError("Unknown shorthand")
+                i += 1
+            else:
+                i += 1
+
+            empty = False
         else:
             i += 1
             empty = False
